@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
-<!--Generated with glade3 3.4.3 on Sat Apr 26 23:58:28 2008 -->
+<!--Generated with glade3 3.4.3 on Sun Apr 27 00:43:06 2008 -->
 <glade-interface>
   <widget class="GtkWindow" id="MainWindow">
     <property name="title" translatable="yes">Myth View</property>
@@ -15,7 +15,6 @@
             <property name="visible">True</property>
             <child>
               <widget class="GtkToolButton" id="btnConnect">
-                <property name="visible">True</property>
                 <property name="label" translatable="yes">Connect</property>
                 <property name="stock_id">gtk-connect</property>
               </widget>
@@ -28,6 +27,7 @@
                 <property name="visible">True</property>
                 <property name="label" translatable="yes">Refresh</property>
                 <property name="stock_id">gtk-refresh</property>
+                <signal name="clicked" handler="on_btnRefresh_clicked"/>
               </widget>
               <packing>
                 <property name="expand">False</property>

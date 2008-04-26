@@ -11,8 +11,7 @@ class MythNowNext:
 	def get_nownext(self):
 		c = self.db.cursor()
 
-		c.execute("""
-				SELECT channel.chanid, channel.icon, cast(channel.channum as signed) as channum, 
+		c.execute("""   SELECT channel.chanid, channel.icon, cast(channel.channum as signed) as channum, 
 				channel.name, program.title, 
 				time_to_sec(timediff(time(program.endtime), time(now()) )) as timetoend
 				FROM channel, program

@@ -30,8 +30,9 @@ class MythViewUI:
 		self.window = self.wTree.get_widget("MainWindow")
 		if (self.window):
 			self.window.connect("destroy", gtk.main_quit)
-
-		self.channelStore = gtk.ListStore(int, gtk.gdk.Pixbuf, str)
+			self.wTree.signal_autoconnect({"on_btnRefresh_clicked" : self.btnRefresh_clicked})
+		
+		self.channelStore = gtk.ListStore(int, int, gtk.gdk.Pixbuf, str, str)
 
 		# Setup the TreeView
     		def addTreeColumn(title, ctype, visible,size):
@@ -45,8 +46,10 @@ class MythViewUI:
         		self.channelTree.append_column(column)
 
 		self.channelTree = self.wTree.get_widget("ChannelView")
-		addTreeColumn("Channel", gtk.CellRendererText(), False,64)
+		addTreeColumn("Channel ID", gtk.CellRendererText(), False,64)
+		addTreeColumn("Channel #", gtk.CellRendererText(), True, 0)
 		addTreeColumn("Icon", gtk.CellRendererPixbuf(), True, 0)
+		addTreeColumn("Name", gtk.CellRendererText(), True, 0)
 		addTreeColumn("Now", gtk.CellRendererText(), True, 0)
 
 		self.UpdateTree()
@@ -54,30 +57,51 @@ class MythViewUI:
 		self.window.show()
 	
 	def UpdateTree(self):
-		# Test Data
-		#self.channelStore.append([1,MythIcon(1805,64,64).pixbuf,"BBC One"])
-                #self.channelStore.append([2,MythIcon(1172,64,64).pixbuf,"BBC Two"])
+
+		print "Refresh Fired"
 
 		rows = MythNowNext(self.mythtv).get_nownext()
 		
+		self.channelStore.clear()
+
 		for row in rows:
 
 			if row[1]:
-				self.channelStore.append([row[0], MythIcon(self.mythtv, row[0], 64, 64).pixbuf, row[3]])
+				icon = MythIcon(self.mythtv, row[0], 64, 64).pixbuf
 			else:
-				self.channelStore.append([row[0], None, row[3]])
+				icon = None
+			
+			# http://www.goldb.org/goldblog/2008/02/06/PythonConvertSecsIntoHumanReadableTimeStringHHMMSS.aspx
+			def humanize_time(secs):
+				mins, secs = divmod(secs, 60)
+				hours, mins = divmod(mins, 60)
+				return '%02d:%02d:%02d' % (hours, mins, secs)
 
-			print row[0]
+			now = "%s\n%s remaning" % (row[4], humanize_time(row[5]))
+
+			self.channelStore.append([row[0], row[2], icon, row[3], now])
 
 		self.channelTree.set_model(self.channelStore)
 
 	def FillCellIcon(self, column, cell, model, iter):
 
+		if column.get_title() == 'Channel ID':
+			cell.set_property('text', model.get_value(iter, 0))
+		if column.get_title() == 'Channel #':
+			cell.set_property('text', model.get_value(iter, 1))
 		if column.get_title() == 'Icon':
-		        cell.set_property('pixbuf', model.get_value(iter, 1) )
+		        cell.set_property('pixbuf', model.get_value(iter, 2))
+		if column.get_title() == 'Name':
+			cell.set_property('text', model.get_value(iter, 3))
 		if column.get_title() == 'Now':
-			cell.set_property('text', model.get_value(iter, 2))
+			cell.set_property('text', model.get_value(iter, 4))
         	return
+
+
+	#### Events
+
+	def btnRefresh_clicked(self, *args):
+		self.UpdateTree()
 
 	def main(self):
 		gtk.main()
