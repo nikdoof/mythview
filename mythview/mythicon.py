@@ -12,10 +12,9 @@ from MythTV import *
 
 class MythIcon:
 	
-	def __init__(self, id, h, w):
+	def __init__(self, mythtv, id, h=None, w=None):
 	
 		self.loaded = False
-		mythtv = MythTV()
 		pixbufload = gtk.gdk.PixbufLoader()
 
 		if os.path.isfile("/tmp/mythtv/%d.jpg" % id):
@@ -29,9 +28,8 @@ class MythIcon:
 			pixbufload.write(data)
 		if pixbufload.get_pixbuf() != None:
 			self.pixbuf = pixbufload.get_pixbuf()
-		self.loaded = True
-		pixbufload.close()
-
+		self.loaded = True		
+		
 		if os.path.exists('/tmp/mythtv') == False:	
 			os.mkdir('/tmp/mythtv')
 		self.save('/tmp/mythtv/%d.jpg' % id, "jpeg", {})
