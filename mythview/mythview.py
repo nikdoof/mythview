@@ -28,6 +28,9 @@ try:
 except:
 	sys.exit(1)
 
+import time
+import datetime
+
 from mythicon import MythIcon
 from mythnownext import MythNowNext
 from MythTV import *
@@ -48,7 +51,8 @@ class MythViewUI:
 			self.window.connect("destroy", gtk.main_quit)
 			self.wTree.signal_autoconnect({"on_btnRefresh_clicked" : self.btnRefresh_clicked})
 		
-		self.channelStore = gtk.ListStore(int, int, gtk.gdk.Pixbuf, str, str)
+		self.statusbar = self.wTree.get_widget("MainStatusBar")
+		self.channelStore = gtk.ListStore(int, int, gtk.gdk.Pixbuf, str, str, str)
 
 		# Setup the TreeView
     		def addTreeColumn(title, ctype, visible,size):
@@ -67,6 +71,7 @@ class MythViewUI:
 		addTreeColumn("Icon", gtk.CellRendererPixbuf(), True, 0)
 		addTreeColumn("Name", gtk.CellRendererText(), True, 0)
 		addTreeColumn("Now", gtk.CellRendererText(), True, 0)
+		addTreeColumn("Next", gtk.CellRendererText(), True, 0)
 
 		self.UpdateTree()
 
@@ -74,9 +79,9 @@ class MythViewUI:
 	
 	def UpdateTree(self):
 
-		print "Refresh Fired"
+		self.statusbar.push(0,"Refreshing...")
 
-		rows = MythNowNext(self.mythtv).get_nownext()
+		rows = MythNowNext(self.mythtv).get_all()
 		
 		self.channelStore.clear()
 
@@ -93,10 +98,17 @@ class MythViewUI:
 				hours, mins = divmod(mins, 60)
 				return '%02d:%02d:%02d' % (hours, mins, secs)
 
-			now = "%s\n%s remaning" % (row[4], humanize_time(row[5]))
+			now = "%s\n%s remaning" % (row[4], humanize_time(row[6]))
 
-			self.channelStore.append([row[0], row[2], icon, row[3], now])
 
+			t = datetime.datetime.now()
+			next_starttime = t + datetime.timedelta(seconds=row[6])
+
+			next = "%s\nStarts: %s" % (row[5], next_starttime.strftime("%I:%M%P"))
+
+			self.channelStore.append([row[0], row[2], icon, row[3], now, next])
+
+		self.statusbar.pop(0)
 		self.channelTree.set_model(self.channelStore)
 
 	def FillCellIcon(self, column, cell, model, iter):
@@ -111,6 +123,8 @@ class MythViewUI:
 			cell.set_property('text', model.get_value(iter, 3))
 		if column.get_title() == 'Now':
 			cell.set_property('text', model.get_value(iter, 4))
+		if column.get_title() == 'Next':
+			cell.set_property('text', model.get_value(iter, 5))
         	return
 
 

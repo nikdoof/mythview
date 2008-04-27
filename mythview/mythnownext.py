@@ -24,12 +24,13 @@ class MythNowNext:
 		else:
 			self.db = MythDB()
 
-	def get_nownext(self):
+	def get_all(self):
 		c = self.db.cursor()
 
 		c.execute("""   SELECT channel.chanid, channel.icon, cast(channel.channum as signed) as channum, 
-				channel.name, program.title, 
-				time_to_sec(timediff(time(program.endtime), time(now()) )) as timetoend
+				channel.name, program.title as now, 
+  				(SELECT program.title as next FROM program WHERE program.starttime >= NOW( ) AND program.chanid = channel.chanid LIMIT 1) as next,
+				time_to_sec(timediff(time(program.endtime), time(now()) )) as now_end
 				FROM channel, program
 				WHERE program.chanid = channel.chanid
 				AND program.starttime <= NOW( )
@@ -44,3 +45,4 @@ class MythNowNext:
 			return rows
 		else:
 			return None
+
