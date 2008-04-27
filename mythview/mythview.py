@@ -25,6 +25,7 @@ class MythViewUI:
 	        self.wTree = gtk.glade.XML(self.gladefile) 
 
 		self.mythtv = MythTV()
+		self.icon_size = 32
 		
 		#Get the Main Window, and connect the "destroy" event
 		self.window = self.wTree.get_widget("MainWindow")
@@ -46,7 +47,7 @@ class MythViewUI:
         		self.channelTree.append_column(column)
 
 		self.channelTree = self.wTree.get_widget("ChannelView")
-		addTreeColumn("Channel ID", gtk.CellRendererText(), False,64)
+		addTreeColumn("Channel ID", gtk.CellRendererText(), False,self.icon_size)
 		addTreeColumn("Channel #", gtk.CellRendererText(), True, 0)
 		addTreeColumn("Icon", gtk.CellRendererPixbuf(), True, 0)
 		addTreeColumn("Name", gtk.CellRendererText(), True, 0)
@@ -67,7 +68,7 @@ class MythViewUI:
 		for row in rows:
 
 			if row[1]:
-				icon = MythIcon(self.mythtv, row[0], 64, 64).pixbuf
+				icon = MythIcon(self.mythtv, row[0], self.icon_size, self.icon_size).pixbuf
 			else:
 				icon = None
 			
